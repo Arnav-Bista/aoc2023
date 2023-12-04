@@ -1,6 +1,7 @@
 mod aoc1;
 mod aoc2;
-pub mod aoc3;
+mod aoc3;
+mod aoc4;
 
 use std::io;
 use std::env;
@@ -10,6 +11,7 @@ use aoc1::AOC1;
 
 use crate::aoc2::AOC2;
 use crate::aoc3::AOC3;
+use crate::aoc4::AOC4;
 
 
 
@@ -54,6 +56,9 @@ fn main() {
                 aoc3_inputs.push(line_vector);
             }
             println!("{}", AOC3::new().solve(&mut aoc3_inputs));
+        }
+        "4" => {
+            println!("{}", AOC4::new().solve(input));
         }
         _ => {
             println!("Args should be 1 - 25");
