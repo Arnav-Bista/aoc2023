@@ -2,16 +2,17 @@ mod aoc1;
 mod aoc2;
 mod aoc3;
 mod aoc4;
+mod aoc5;
 
 use std::io;
 use std::env;
 use std::process::exit;
 
-use aoc1::AOC1;
-
+use crate::aoc1::AOC1;
 use crate::aoc2::AOC2;
 use crate::aoc3::AOC3;
 use crate::aoc4::AOC4;
+use crate::aoc5::AOC5;
 
 
 
@@ -59,6 +60,12 @@ fn main() {
         }
         "4" => {
             println!("{}", AOC4::new().solve(input));
+        }
+        "5-1" => {
+            println!("{}", AOC5::new().solve(input));
+        }
+        "5-2" => {
+            println!("{}", AOC5::new().solve_p2(input));
         }
         _ => {
             println!("Args should be 1 - 25");
