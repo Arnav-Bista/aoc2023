@@ -78,46 +78,54 @@ impl AOC5 {
 
     fn process_map_p2(&mut self, line: &str, level: usize) {
         let numbers: (u64, u64, u64) = self.get_numbers(line);
-        for i in 0..self.values_p2.len() {
+        let mut i = 0;
+        while i < self.values_p2.len() { 
             let val: (u64, u64) = self.values_p2[i];
-            if self.level[i] <= level {
+            if self.level[i] < level {
+                let map_end = numbers.1 + numbers.2 - 1;
+                let seed_end = val.0 + val.1 - 1;
                 // Check if the ranges overlap
-                if val.0 <= numbers.1 + numbers.2 && numbers.1 <= val.0 + val.1 {
-                    self.level[i] = level;
-                    // Case 1 - Map Range consumes Seed Range or equal
-                    if val.0 >= numbers.1 && val.1 <= numbers.2 {
+                if val.0 <= map_end && numbers.1 <= seed_end {
+                    self.level[i] = i;
+                    // case 1 map is equal or greater than seed
+                    if val.0 >= numbers.1 && seed_end <= map_end {
                         let start_diff = val.0 - numbers.1;
-                        let range_diff = val.1.min(numbers.2);
-                        let new_range = (numbers.0 + start_diff, range_diff);
-                        self.values_p2[i] = new_range;
+                        self.values_p2[i] = (numbers.0 + start_diff, val.1);
                     }
-                    // Case 2 - Seed Range starts below Map range
+                    // case 2 seed is greater than map 
+                    else if val.0 < numbers.1 && seed_end > map_end {
+                        self.values_p2[i] = (numbers.0, numbers.2);
+
+                        let start_diff = numbers.1 - val.0;
+                        let end_diff = seed_end - map_end;
+
+                        self.values_p2.push((val.0, start_diff));
+                        self.values_p2.push((map_end + 1, end_diff));
+                        
+                        // Needs to be reevaluated
+                        self.level.push(level - 1);
+                        self.level.push(level - 1);
+                    }
+                    // case 3 seed starts before and ends inside the map
                     else if val.0 < numbers.1 {
                         let start_diff = numbers.1 - val.0;
-                        let seed_range = (val.0 + val.1) - numbers.2;
-                        let new_range = (numbers.0, seed_range);
-                        let leftover_range = (val.0, start_diff);
-                        self.values_p2[i] = new_range;
-                        self.values_p2.push(leftover_range);
-                        if seed_range != 0 {
-                            self.level.push(level);
-                        }
+                        let end_diff = map_end - seed_end;
+                        self.values_p2[i] = (val.0, start_diff);
+                        
+                        self.values_p2.push((numbers.0, numbers.2 - end_diff));
+                        self.level.push(level - 1);
                     }
-                    // Case 3 - Seed Range exceeds Map Range
-                    else if val.0 > numbers.1 {
+                    // case 4 seed starts in range and ends outside map
+                    else {
                         let start_diff = val.0 - numbers.1;
-                        let map_range_end = numbers.1 + numbers.2;
-                        let end_diff = val.0 + val.1 - map_range_end;
-                        let new_range = (numbers.0 + start_diff, end_diff);
-                        let leftover_range = (map_range_end, end_diff);
-                        self.values_p2[i] = new_range;
-                        self.values_p2.push(leftover_range);
-                        if end_diff != 0 {
-                            self.level.push(level);
-                        }
+                        let end_diff = seed_end - map_end;
+                        self.values_p2[i] = (numbers.0 + start_diff, numbers.2 - start_diff);
+                        self.values_p2.push((map_end + 1, end_diff));
+                        self.level.push(level - 1);
                     }
                 }
             }
+            i += 1;
         }
     }
 
@@ -136,9 +144,10 @@ impl AOC5 {
             }
             // Now each input will be a MAP 
             // DEST SOURCE LENGTH
-            self.process_map_p2(&lines[i], level);
-            println!("Map Processed {}/{} Length: {}", i, lines.len(), self.values_p2.len());
+            self.process_map_p2(&lines[i], i);
+            println!("Map Processed {}/{} Length: {}", level, lines.len(), self.values_p2.len());
         }
+        println!("{:?}", self.values_p2);
         let mut min: u64 = u64::MAX;
         for (val,_) in &self.values_p2 {
             min = min.min(*val);
