@@ -4,6 +4,7 @@ mod aoc3;
 mod aoc4;
 mod aoc5;
 mod aoc6;
+mod aoc7;
 
 use std::io;
 use std::env;
@@ -15,6 +16,7 @@ use crate::aoc3::AOC3;
 use crate::aoc4::AOC4;
 use crate::aoc5::AOC5;
 use crate::aoc6::AOC6;
+use crate::aoc7::AOC7;
 
 
 
@@ -74,6 +76,9 @@ fn main() {
         }
         "6-2" => {
             println!("{}", AOC6::new().solve_p2(input));
+        }
+        "7-1" => {
+            println!("{}", AOC7::new().solve_p1(input));
         }
         _ => {
             println!("Args should be 1 - 25");
