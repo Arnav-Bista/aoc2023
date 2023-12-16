@@ -1,6 +1,9 @@
 use std::{collections::HashMap, cmp::Ordering};
 
+// P1
 const CARDS: [char; 13] = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
+// P2
+const CARDS_P2: [char; 13] = ['J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'];
 
 pub struct AOC7 {
     winnings: u32,
@@ -37,12 +40,12 @@ impl AOC7 {
             _ => 1
         };
         Node {
+            is_p2: false,
             card_type,
             cards: cards.to_owned(),
             bid,
             left: None,
             right: None
-
         }
     }
 
@@ -92,11 +95,84 @@ impl AOC7 {
         self.get_winnings(root);
         self.winnings
     }
+
+
+    // P2
+
+
+    fn create_node_p2(&self, line: &str) -> Node {
+        let mut iterator = line.split_whitespace();
+        let cards = iterator.next().unwrap();
+        let bid: u32 = iterator.next().unwrap().parse().unwrap();
+        let mut map: HashMap<char, u32> = HashMap::new();
+        for character in cards.chars() {
+            map.insert(character, *map.get(&character).unwrap_or(&0) + 1);
+        }
+        // P2
+        if map.get(&'J').is_some() {
+            let joker_num = *map.get(&'J').unwrap();
+            let mut max: char = ' ';
+            let mut count: u32 = 0;
+            for key in map.keys() {
+                if key == &'J' { 
+                    continue;
+                }
+                let current = map.get(&key).unwrap();
+                if current > &count {
+                    count = *current;
+                    max = *key;
+                }
+            }
+            // Could be all Js
+            if max != ' ' {
+                map.remove_entry(&'J').unwrap();
+                map.insert(max, joker_num + count);
+            }
+        }
+
+        let mut values: Vec<u32> =  map.values().map(|val| *val).collect();
+        values.sort_unstable();
+        let card_type = match values[..] {
+            [5] => 7,
+            [1, 4] => 6,
+            [2, 3] => 5,
+            [1, 1, 3] => 4,
+            [1, 2 ,2] => 3,
+            [1, 1, 1, 2] => 2,
+            _ => 1
+        };
+        Node {
+            is_p2: true,
+            card_type,
+            cards: cards.to_owned(),
+            bid,
+            left: None,
+            right: None
+        }
+    }
+
+
+
+    pub fn solve_p2(&mut self, lines: Vec<String>) -> u32 {
+        let mut root: Option<Box<Node>> = None;
+        for line in lines {
+            let node = self.create_node_p2(&line);
+            if root.is_none() {
+                root = Some(Box::new(node));
+            }
+            else {
+                AOC7::add_to_tree(root.as_mut().unwrap(), node);
+            }
+        }
+        self.get_winnings(root);
+        self.winnings
+    }
 }
 
 
 
 struct Node {
+    is_p2: bool,
     card_type: u8,
     cards: String,
     bid: u32,
@@ -122,7 +198,8 @@ impl PartialOrd for Node {
         for (s,o) in iter {
             let mut s_val = 0;
             let mut o_val = 0;
-            for (i, card) in CARDS.iter().enumerate() {
+            let iter = if self.is_p2 { CARDS_P2.iter().enumerate() } else { CARDS.iter().enumerate() };
+            for (i, card) in iter {
                 if s == *card {
                     s_val = i + 1;
                 }

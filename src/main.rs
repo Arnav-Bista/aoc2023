@@ -80,6 +80,9 @@ fn main() {
         "7-1" => {
             println!("{}", AOC7::new().solve_p1(input));
         }
+        "7-2" => {
+            println!("{}", AOC7::new().solve_p2(input));
+        }
         _ => {
             println!("Args should be 1 - 25");
         }
