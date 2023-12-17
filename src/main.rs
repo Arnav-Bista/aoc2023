@@ -88,6 +88,9 @@ fn main() {
         "8-1" => {
             println!("{}", AOC8::new().solve_p1(input));
         }
+        "8-2" => {
+            println!("{}", AOC8::new().solve_p2(input));
+        }
         _ => {
             println!("Args should be 1 - 25");
         }
