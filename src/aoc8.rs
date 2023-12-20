@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}, fmt::Display, mem::swap};
+use std::{collections::{HashMap, HashSet}, fmt::Display, mem::swap, arch::x86_64::_MM_FROUND_CUR_DIRECTION};
 
 use regex::Regex;
 
@@ -125,44 +125,55 @@ impl AOC8 {
         // We need to get the LCM of the loop step + constant
         let mut distance_to_loop = vec![0; nodes.len()];
         let mut loop_length = vec![0; nodes.len()];
+        let mut distance_to_z = vec![0; nodes.len()];
+
         for i in 0..nodes.len() {
 
-            let mut current_node = nodes[i].to_string();
-            let edges = self.map.get(&current_node).unwrap();
-            let direction = &self.moves[distance_to_loop[i] as usize % self.moves.len()];
-            let mut node_hash = AOC8::get_hash(current_node.clone(), edges.clone(), direction);
             let mut visited: HashMap<String, u32> = HashMap::new();
+            let mut current_node = nodes[i].to_string();
 
-            while !visited.contains_key(&node_hash) {
-                visited.insert(node_hash, distance_to_loop[i]);
-                
+            let mut node_hash;
+            
+            loop {
                 let edges = self.map.get(&current_node).unwrap();
                 let direction = &self.moves[distance_to_loop[i] as usize % self.moves.len()];
+                node_hash = current_node + &(distance_to_loop[i] as usize % self.moves.len()).to_string();
+                // node_hash = AOC8::get_hash(current_node.clone(), edges.clone(), direction);
 
-                distance_to_loop[i] += 1;
                 current_node = match direction {
                     Direction::Left => edges.0.to_owned(),
                     Direction::Right => edges.1.to_owned()
                 };
-                node_hash = AOC8::get_hash(current_node.clone(), edges.clone(), &direction);
+
+                //
+                // if visited.contains_key(&node_hash) {
+                //     break
+                // }
+                visited.insert(node_hash, distance_to_loop[i]);
+                distance_to_loop[i] += 1;
+
+                if current_node.ends_with('Z') {
+                    println!("FOUND");
+                    distance_to_z[i] = distance_to_loop[i];
+                    break;
+                }
+
 
             }
-            println!("BEFORE");
-            println!("Loop: {:?}", loop_length);
-            println!("Const {:?}", distance_to_loop);
-            let length = visited.get(&node_hash).unwrap();
-            loop_length[i] = distance_to_loop[i] - length;
-            distance_to_loop[i] = *length;
-            println!("AFTER");
-            println!("Loop: {:?}", loop_length);
-            println!("Const {:?}", distance_to_loop);
+            // let length = visited.get(&node_hash).unwrap();
+            // loop_length[i] = distance_to_loop[i] - length;
+            // distance_to_loop[i] = *length;
+            // println!("{:?}", visited);
         }
-
+        println!("{:?}", distance_to_z);
         println!("{:?}", distance_to_loop);
+        println!("{:?}", loop_length);
+        
 
         // We SHOULD have the length of the loop as well as the length till entering the loop
-        let lcm = loop_length.iter().copied().reduce(|a, b| AOC8::lcm(a, b)).unwrap();
-        let max_constant = distance_to_loop.iter().max().unwrap();
-        lcm + max_constant
+        // let lcm = loop_length.iter().copied().reduce(|a, b| AOC8::lcm(a, b)).unwrap();
+        // let max_constant = distance_to_loop.iter().max().unwrap();
+        let huh_lcm = distance_to_z.iter().copied().reduce(|a, b| AOC8::lcm(a, b)).unwrap();
+        huh_lcm 
     }
 }
