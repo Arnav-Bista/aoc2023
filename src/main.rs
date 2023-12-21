@@ -7,12 +7,14 @@ mod aoc6;
 mod aoc7;
 mod aoc8;
 mod aoc9;
+mod aoc10;
 
 use std::io;
 use std::env;
 use std::process::exit;
 
 use crate::aoc1::AOC1;
+use crate::aoc10::AOC10;
 use crate::aoc2::AOC2;
 use crate::aoc3::AOC3;
 use crate::aoc4::AOC4;
@@ -23,7 +25,16 @@ use crate::aoc8::AOC8;
 use crate::aoc9::AOC9;
 
 
-
+fn pad_inputs(lines: Vec<String>, filler: String) -> Vec<String> {
+    let mut res: Vec<String> = Vec::with_capacity(lines.len());
+    let filler_line = filler.repeat(lines[0].len() + 2);
+    res.push(filler_line.clone());
+    for line in lines {
+        res.push(filler.clone() + &line + &filler);
+    }
+    res.push(filler_line);
+    res 
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -98,6 +109,10 @@ fn main() {
         }
         "9-2" => {
             println!("{}", AOC9::solve_p2(input));
+        }
+        "10-1" => {
+            let input = pad_inputs(input, ".".to_owned());
+            println!("{}", AOC10::new().solve_p1(input));
         }
         _ => {
             println!("Args should be 1 - 25");
